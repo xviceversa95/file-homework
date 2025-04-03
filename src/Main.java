@@ -13,14 +13,14 @@ public class Main {
 
     public static void main(String[] args) {
 
-    // Проверям наличие корневой директории:
-    // Если корневая директория отсутствует, создадим её:
-    // Добавить проверку на чтение и запись
+        // Проверям наличие корневой директории:
+        // Если корневая директория отсутствует, создадим её:
+        // Добавить проверку на чтение и запись
 
         File root_dir = new File(BASE_DIR);
         if (!root_dir.exists()) {
             root_dir.mkdir();
-            log.append(LocalDateTime.now() + " Корневая директория "+ root_dir.getName() + " создана по адресу " + root_dir.getAbsolutePath() + separator);
+            log.append(LocalDateTime.now() + " Корневая директория " + root_dir.getName() + " создана по адресу " + root_dir.getAbsolutePath() + separator);
         } else {
             log.append(LocalDateTime.now() + " Корневая директория " + root_dir.getName() + " существует по адресу " + root_dir.getAbsolutePath() + separator);
         }
@@ -30,63 +30,62 @@ public class Main {
             log.append(LocalDateTime.now() + " Корневая директория недоступна для чтения или записи" + separator);
         }
 
-    // Список базовых директорий:
+        // Список базовых директорий:
         String[] baseDirectories = {
                 "src",
                 "res",
                 "savegames",
                 "temp"
         };
-    // Список поддиректорий res:
+        // Список поддиректорий res:
         String[] resDirectories = {
                 "drawables",
                 "vectors",
                 "icons"
         };
 
-    // Список поддиректорий src:
+        // Список поддиректорий src:
         String[] srcDirectories = {
                 "main",
                 "test"
         };
 
-    // Список файлов директории BASE_DIR/src/main:
+        // Список файлов директории BASE_DIR/src/main:
         String[] mainFiles = {
                 "Main.txt",
                 "Utils.java"
         };
 
-    // Список файлов директории BASE_DIR/temp:
-       String[] tempFiles = {
-               "temp.txt"
-       };
+        // Список файлов директории BASE_DIR/temp:
+        String[] tempFiles = {
+                "temp.txt"
+        };
 
 
-
-    // Создаём базовые директории внутри корневой папки игры:
+        // Создаём базовые директории внутри корневой папки игры:
         for (String directory : baseDirectories) {
             createDirectory(root_dir, directory);
         }
 
-    // Создаём субдиректории в src:
+        // Создаём субдиректории в src:
         for (String directory : srcDirectories) {
             File src = new File(BASE_DIR, "src");
             createDirectory(src, directory);
         }
 
-    // Создаём субдиректории в res:
+        // Создаём субдиректории в res:
         for (String directory : resDirectories) {
             File res = new File(BASE_DIR, "res");
             createDirectory(res, directory);
         }
 
-    // Создаём файлы в директории BASE_DIR/src/main:
+        // Создаём файлы в директории BASE_DIR/src/main:
         for (String item : mainFiles) {
             File parentDir = new File(BASE_DIR, "src/main");
             createFile(parentDir, item);
         }
 
-    // Создаём файлы в директории BASE_DIR/src/temp:
+        // Создаём файлы в директории BASE_DIR/src/temp:
         for (String item : tempFiles) {
             File parentDir = new File(BASE_DIR, "temp");
             createFile(parentDir, item);
@@ -117,7 +116,7 @@ public class Main {
                 "H://Games/savegames/savegames3.dat"
         };
 
-        for (String path : savepathList){
+        for (String path : savepathList) {
             for (GameProgress save : gameList) {
                 saveGame(path, save);
             }
@@ -125,7 +124,6 @@ public class Main {
         zipFiles(zipPath, savepathList);
 
     }
-
 
 
     //Метод для создания директорий:
@@ -140,7 +138,7 @@ public class Main {
     }
 
     //Метод для создания файлов в директориях:
-    public static void createFile (File parent_dir, String fileName) {
+    public static void createFile(File parent_dir, String fileName) {
         try {
             File file = new File(parent_dir, fileName);
             file.createNewFile();
@@ -150,36 +148,38 @@ public class Main {
         }
     }
 
-    public static void saveGame (String savepath, GameProgress progress) {
+    public static void saveGame(String savepath, GameProgress progress) {
         File file = new File(savepath);
         try (FileOutputStream fos = new FileOutputStream(file);
-            ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(progress);
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
+
     public static void zipFiles(String zipPath, String[] fileList) {
+        try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipPath));) {
+            for (String file : fileList) {
+                try (
+                        FileInputStream fis = new FileInputStream(file)) {
+                    ZipEntry entry = new ZipEntry(file);
+                    zout.putNextEntry(entry);
+                    byte[] buffer = new byte[fis.available()];
+                    fis.read(buffer);
+                    zout.write(buffer);
+                    zout.closeEntry();
+                    System.out.println("Файл " + file + " закинули в архив");
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
 
-             for (String file : fileList) {
-                 try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipPath));
-                     FileInputStream fis = new FileInputStream(file)) {
-                     ZipEntry entry = new ZipEntry(file);
-                     zout.putNextEntry(entry);
-                     byte[] buffer = new byte[fis.available()];
-                     fis.read(buffer);
-                     zout.write(buffer);
-                     zout.closeEntry();
-                     System.out.println("Файл " + file + " закинули в архив");
-                 } catch (IOException ex) {
-                     System.out.println(ex.getMessage());
-                 }
-
-
-
-             }
         }
     }
+}
 
 
