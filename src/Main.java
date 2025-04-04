@@ -121,7 +121,12 @@ public class Main {
                 saveGame(path, save);
             }
         }
-        zipFiles(zipPath, savepathList);
+
+
+        if (zipFiles(zipPath, savepathList)) {
+            deleteFile(savepathList);
+        }
+
 
     }
 
@@ -159,11 +164,10 @@ public class Main {
         }
     }
 
-    public static void zipFiles(String zipPath, String[] fileList) {
+    public static boolean zipFiles(String zipPath, String[] fileList) {
         try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipPath));) {
             for (String file : fileList) {
-                try (
-                        FileInputStream fis = new FileInputStream(file)) {
+                try (FileInputStream fis = new FileInputStream(file)) {
                     ZipEntry entry = new ZipEntry(file);
                     zout.putNextEntry(entry);
                     byte[] buffer = new byte[fis.available()];
@@ -173,13 +177,24 @@ public class Main {
                     System.out.println("Файл " + file + " закинули в архив");
                 } catch (IOException ex) {
                     System.out.println(ex.getMessage());
+                    return false;
                 }
             }
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
+            return false;
 
         }
+        return true;
     }
+    public static void deleteFile (String[] fileList) {
+        for (String item : fileList) {
+            File file = new File(item);
+            file.delete();
+        }
+
+    }
+
 }
 
 
